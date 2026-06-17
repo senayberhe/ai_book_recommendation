@@ -1,0 +1,31 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environments
+.venv/
+.env
+.env.*
+!.env.example
+
+# Secrets / credentials
+*.key
+
+# Tooling caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Generated vector store (rebuilt on first run)
+chroma_db/
+
+# OS files
+.DS_Store
+
+# Old git history containing a leaked key — delete this folder from Finder
+_OLD_GIT_HAS_SECRET_DELETE_ME/
