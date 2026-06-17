@@ -12,6 +12,8 @@ license: mit
 
 # 📚 Semantic Book Recommender
 
+[![Live Demo](https://img.shields.io/badge/🤗%20Live%20Demo-Hugging%20Face%20Spaces-blue)](https://huggingface.co/spaces/sunny20/semantic-book-recommender)
+
 Find your next read by *describing it*. Type something like *"a hopeful story
 about second chances"*, optionally pick a category and an emotional tone, and
 the app returns the most semantically similar books from a catalogue of ~5,000
@@ -20,8 +22,7 @@ titles.
 It combines semantic search (OpenAI embeddings + a Chroma vector store) with
 metadata filtering and emotion-based re-ranking, wrapped in a Gradio UI.
 
-> **Live demo:** _add your Hugging Face Spaces URL here after deploying (see
-> [Deploy](#-deploy-free-on-hugging-face-spaces))._
+> **🚀 Live demo:** <https://huggingface.co/spaces/sunny20/semantic-book-recommender>
 
 ## ✨ Features
 
@@ -79,8 +80,8 @@ plain `pip` works too.
 
 ```bash
 # 1. Clone
-git clone https://github.com/<your-username>/ai-book-recommendation.git
-cd ai-book-recommendation
+git clone https://github.com/senayberhe/ai_book_recommendation.git
+cd ai_book_recommendation
 
 # 2. Install (choose one)
 uv sync                      # with uv
