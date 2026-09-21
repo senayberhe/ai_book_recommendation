@@ -1,0 +1,34 @@
+# Secrets — must never end up in an image layer
+.env
+.env.*
+!.env.example
+*.key
+_OLD_GIT_HAS_SECRET_DELETE_ME/
+
+# VCS / editor / OS
+.git
+.github
+.DS_Store
+.vscode
+
+# Python artefacts and environments
+.venv
+__pycache__/
+*.py[oc]
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Not needed at runtime
+notebooks/
+tests/
+docs/
+DEPLOY.md
+deploy_to_hf.sh
+uv.lock
+chroma_db/
+data/books_cleaned.csv
+data/books_with_categories.csv
+data/tagged_description.txt

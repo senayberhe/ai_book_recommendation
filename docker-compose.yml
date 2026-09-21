@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    image: book-recommender
+    ports:
+      - "7860:7860"
+    env_file: .env # must define OPENAI_API_KEY (copy .env.example)
+    volumes:
+      - chroma_data:/data # persisted vector index
+    restart: unless-stopped
+
+volumes:
+  chroma_data:

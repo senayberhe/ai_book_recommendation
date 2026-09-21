@@ -103,6 +103,27 @@ On the first run the app builds the Chroma index from the dataset (this calls
 the OpenAI embeddings API and takes a few minutes). Subsequent runs load the
 persisted index instantly. Open the local URL Gradio prints.
 
+## 🐳 Run with Docker
+
+No Python setup needed — just Docker and an OpenAI key.
+
+```bash
+cp .env.example .env          # then set OPENAI_API_KEY
+docker compose up --build     # http://localhost:7860
+```
+
+Or without compose:
+
+```bash
+docker build -t book-recommender .
+docker run --rm -p 7860:7860 --env-file .env -v chroma_data:/data book-recommender
+```
+
+The image is built from the lean `requirements.txt` (no torch/jupyter), runs as a
+non-root user, and never contains your `.env` (see `.dockerignore`). The Chroma index
+lives on the `chroma_data` volume, so it's built once on first start and reused after.
+CI builds the image on every push to catch Dockerfile regressions.
+
 ## 🧪 Testing
 
 The core logic is covered by a pytest suite that runs offline — no API key, no
@@ -174,7 +195,7 @@ environment variables, so secrets stay out of the code.
 ## 🛠️ Built with
 
 Python · Gradio · LangChain · OpenAI Embeddings · Chroma · pandas ·
-Transformers / scikit-learn (data pipeline) · pytest · ruff · mypy
+Transformers / scikit-learn (data pipeline) · pytest · ruff · mypy · Docker · GitHub Actions
 
 ## 📄 License
 
