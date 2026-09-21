@@ -33,11 +33,15 @@ class BookRecommender:
         vector_store: VectorStore,
         initial_top_k: int | None = None,
         final_top_k: int | None = None,
+        tone_weight: float | None = None,
     ) -> None:
         self.books = books
         self.vector_store = vector_store
         self.initial_top_k = initial_top_k or settings.initial_top_k
         self.final_top_k = final_top_k or settings.final_top_k
+        self.tone_weight = settings.tone_weight if tone_weight is None else tone_weight
+        if not 0.0 <= self.tone_weight <= 1.0:
+            raise ValueError("tone_weight must be between 0 and 1")
 
     def recommend(
         self,
@@ -51,6 +55,9 @@ class BookRecommender:
             query: Free-text description of the kind of book wanted.
             category: A ``simple_categories`` value, or ``"All"`` for no filter.
             tone: One of the configured tones, or ``"All"`` to keep semantic order.
+                A tone blends the semantic rank with the book's score for that
+                emotion (weighted by ``tone_weight``) instead of replacing it, so a
+                strong match for the query is not buried by a merely emotional one.
 
         Returns:
             A DataFrame of recommended books, ordered by relevance (and tone when
@@ -76,7 +83,13 @@ class BookRecommender:
 
         emotion_column = TONE_TO_EMOTION.get(tone)
         if emotion_column and emotion_column in filtered.columns:
-            filtered = filtered.sort_values(by=emotion_column, ascending=False)
+            # Semantic score: 1.0 for the best hit, falling linearly to ~0 for the
+            # last. Emotion scores are already probabilities in [0, 1].
+            semantic_score = 1.0 - filtered["semantic_rank"] / len(isbn_order)
+            filtered["blended_score"] = (
+                1.0 - self.tone_weight
+            ) * semantic_score + self.tone_weight * filtered[emotion_column]
+            filtered = filtered.sort_values(by="blended_score", ascending=False, kind="stable")
 
         return filtered.head(self.final_top_k)
 

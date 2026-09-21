@@ -31,7 +31,8 @@ metadata filtering and emotion-based re-ranking, wrapped in a Gradio UI.
 - **Natural-language search** over book descriptions using OpenAI embeddings.
 - **Category filtering** by simplified genre (Fiction / Nonfiction, etc.).
 - **Emotional-tone re-ranking** — Happy, Surprising, Angry, Suspenseful, Sad —
-  derived from per-book emotion scores.
+  derived from per-book emotion scores and *blended* with semantic relevance
+  (`TONE_WEIGHT`, default 0.5), so a strong match isn't buried by a merely moody one.
 - **Persistent vector store** — the Chroma index is built once and reused, so
   you don't re-embed (or re-pay) on every run.
 - **Tested, typed, linted** core logic with a CI pipeline.
@@ -43,7 +44,7 @@ query ──▶ Chroma similarity search ──▶ map hits back to catalogue
                                             │
                                   category filter (optional)
                                             │
-                                emotional-tone re-rank (optional)
+                       blend semantic rank + emotion score (optional)
                                             │
                                      top-K results ──▶ Gradio gallery
 ```
@@ -167,7 +168,7 @@ live app for a few natural-language queries:
 | Query | Filters | Top results |
 |---|---|---|
 | *"a hopeful story about second chances"* | — | *A Time to Embrace* (Karen Kingsbury), *The Great Gatsby* (F. Scott Fitzgerald), *Carly's Sound* (Ali Vali) |
-| *"a tense thriller with a detective"* | Tone: Suspenseful | *Mystery Play* (Grant Morrison), *Different Seasons* (Stephen King), *Fat Tuesday* (Sandra Brown) |
+| *"a tense thriller with a detective"* | Tone: Suspenseful | *The Woman in Black* (Susan Hill), *Fat Tuesday* (Sandra Brown), *The Apprentice* (Tess Gerritsen) |
 | *"a lighthearted romantic comedy"* | Category: Fiction, Tone: Happy | *Every Boy's Got One* (Meg Cabot), *Chocolat* (Joanne Harris), *Millie's Fling* (Jill Mansell) |
 | *"a deep dive into science and the universe"* | Category: Nonfiction | *Unweaving the Rainbow* (Richard Dawkins), *A Short History of Nearly Everything* (Bill Bryson), *The Future of Spacetime* (Hawking, Thorne, et al.) |
 

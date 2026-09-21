@@ -34,6 +34,7 @@ class Settings:
     embedding_model: str
     initial_top_k: int
     final_top_k: int
+    tone_weight: float
     cover_not_found: str
 
     @classmethod
@@ -47,6 +48,7 @@ class Settings:
             embedding_model=os.getenv("EMBEDDING_MODEL", "text-embedding-3-small"),
             initial_top_k=int(os.getenv("INITIAL_TOP_K", "50")),
             final_top_k=int(os.getenv("FINAL_TOP_K", "16")),
+            tone_weight=float(os.getenv("TONE_WEIGHT", "0.5")),
             cover_not_found=os.getenv("COVER_NOT_FOUND", "cover-not-found.jpg"),
         )
 
