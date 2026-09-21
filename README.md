@@ -24,6 +24,8 @@ metadata filtering and emotion-based re-ranking, wrapped in a Gradio UI.
 
 > **🚀 Live demo:** <https://huggingface.co/spaces/sunny20/semantic-book-recommender>
 
+![Screenshot of the Semantic Book Recommender UI](docs/screenshot.png)
+
 ## ✨ Features
 
 - **Natural-language search** over book descriptions using OpenAI embeddings.
