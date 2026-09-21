@@ -29,7 +29,6 @@ jobs:
 
       - name: Type check (mypy)
         run: mypy book_recommender
-        continue-on-error: true
 
       - name: Run tests
         run: pytest

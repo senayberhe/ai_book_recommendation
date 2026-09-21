@@ -86,6 +86,8 @@ cd ai_book_recommendation
 # 2. Install (choose one)
 uv sync                      # with uv
 # pip install -e .           # with pip
+# add --extra notebooks (uv) / pip install -e ".[notebooks]" only if you want to
+# re-run the data-pipeline notebooks (pulls in torch, transformers, jupyter)
 
 # 3. Add your OpenAI key
 cp .env.example .env
@@ -132,6 +134,23 @@ can put on a résumé.
 > **Cost note:** embeddings are billed by OpenAI per token. The dataset is
 > embedded once; after that only short user queries are embedded, so ongoing
 > cost is minimal. You can set spend limits in the OpenAI dashboard.
+
+## 🔍 Does it actually work? Example queries
+
+The whole point of semantic search is that it should return books that *fit
+the vibe* of a query, not just keyword matches. Here's real output from the
+live app for a few natural-language queries:
+
+| Query | Filters | Top results |
+|---|---|---|
+| *"a hopeful story about second chances"* | — | *A Time to Embrace* (Karen Kingsbury), *The Great Gatsby* (F. Scott Fitzgerald), *Carly's Sound* (Ali Vali) |
+| *"a tense thriller with a detective"* | Tone: Suspenseful | *Mystery Play* (Grant Morrison), *Different Seasons* (Stephen King), *Fat Tuesday* (Sandra Brown) |
+| *"a lighthearted romantic comedy"* | Category: Fiction, Tone: Happy | *Every Boy's Got One* (Meg Cabot), *Chocolat* (Joanne Harris), *Millie's Fling* (Jill Mansell) |
+| *"a deep dive into science and the universe"* | Category: Nonfiction | *Unweaving the Rainbow* (Richard Dawkins), *A Short History of Nearly Everything* (Bill Bryson), *The Future of Spacetime* (Hawking, Thorne, et al.) |
+
+No keyword in any of these queries appears in the book titles above — the
+matches come purely from embedding similarity between the query and each
+book's description, which is what "semantic" is doing here.
 
 ## 📊 Dataset & pipeline
 
