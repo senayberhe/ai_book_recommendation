@@ -43,11 +43,16 @@ class FakeVectorStore:
     def __init__(self, isbn_order: list[str]) -> None:
         self._isbn_order = isbn_order
 
-    def similarity_search(self, query: str, k: int) -> list[Document]:
-        return [
-            Document(page_content="", metadata={"isbn13": isbn})
-            for isbn in self._isbn_order[:k]
+    def similarity_search(
+        self, query: str, k: int, *, filter: dict[str, str] | None = None
+    ) -> list[Document]:
+        categories = {"111": "Fiction", "222": "Fiction", "333": "Nonfiction", "444": "Fiction"}
+        matches = [
+            isbn
+            for isbn in self._isbn_order
+            if filter is None or categories.get(isbn) == filter["category"]
         ]
+        return [Document(page_content="", metadata={"isbn13": isbn}) for isbn in matches[:k]]
 
 
 @pytest.fixture

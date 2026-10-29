@@ -20,8 +20,9 @@ from .config import TONE_TO_EMOTION, settings
 class VectorStore(Protocol):
     """Minimal interface the recommender needs from a vector store."""
 
-    def similarity_search(self, query: str, k: int) -> list[Document]:
-        ...  # pragma: no cover - protocol method
+    def similarity_search(
+        self, query: str, k: int, *, filter: dict[str, str] | None = None
+    ) -> list[Document]: ...  # pragma: no cover - protocol method
 
 
 class BookRecommender:
@@ -66,8 +67,17 @@ class BookRecommender:
         if not query or not query.strip():
             return self.books.iloc[0:0].copy()
 
-        hits = self.vector_store.similarity_search(query, k=self.initial_top_k)
-        isbn_order = [doc.metadata["isbn13"] for doc in hits]
+        # Filter inside the vector search, so niche categories compete within their
+        # own catalogue rather than being removed from a global top-k shortlist.
+        if category != "All":
+            if category not in self.categories():
+                return self.books.iloc[0:0].copy()
+            hits = self.vector_store.similarity_search(
+                query, k=self.initial_top_k, filter={"category": category}
+            )
+        else:
+            hits = self.vector_store.similarity_search(query, k=self.initial_top_k)
+        isbn_order = list(dict.fromkeys(str(doc.metadata["isbn13"]) for doc in hits))
         if not isbn_order:
             return self.books.iloc[0:0].copy()
 

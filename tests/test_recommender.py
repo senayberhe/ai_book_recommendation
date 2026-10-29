@@ -79,3 +79,26 @@ def test_recommend_empty_query_returns_empty(sample_books, fake_vector_store) ->
 def test_categories_are_sorted_with_all_first(sample_books, fake_vector_store) -> None:
     rec = _make_recommender(sample_books, fake_vector_store)
     assert rec.categories() == ["All", "Fiction", "Nonfiction"]
+
+
+def test_category_is_filtered_before_top_k(sample_books, fake_vector_store) -> None:
+    rec = BookRecommender(prepare_books(sample_books), fake_vector_store, initial_top_k=1)
+    # Nonfiction ranks third globally, outside top-1, but must still be found.
+    result = rec.recommend("science", category="Nonfiction", tone="Happy")
+    assert result["isbn13"].tolist() == ["333"]
+
+
+def test_unknown_category_returns_empty_without_search(sample_books) -> None:
+    class NoSearch:
+        def similarity_search(self, *args, **kwargs):
+            raise AssertionError("Unknown categories should not call the embedding API")
+
+    rec = BookRecommender(prepare_books(sample_books), NoSearch())
+    assert rec.recommend("science", category="Not a category").empty
+
+
+def test_duplicate_hits_preserve_first_semantic_rank(sample_books) -> None:
+    from .conftest import FakeVectorStore
+
+    rec = _make_recommender(sample_books, FakeVectorStore(["222", "111", "222"]))
+    assert rec.recommend("anything")["isbn13"].tolist() == ["222", "111"]

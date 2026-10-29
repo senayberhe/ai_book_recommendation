@@ -17,7 +17,11 @@ from dotenv import load_dotenv  # noqa: E402
 
 from book_recommender.data import load_books  # noqa: E402
 from book_recommender.recommender import BookRecommender  # noqa: E402
-from book_recommender.ui import build_dashboard  # noqa: E402
+from book_recommender.ui import (  # noqa: E402
+    DASHBOARD_CSS,
+    build_dashboard,
+    dashboard_theme,
+)
 from book_recommender.vector_store import get_vector_store  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -46,7 +50,7 @@ def create_app():
 
 def main() -> None:
     """Launch the dashboard."""
-    create_app().launch()
+    create_app().launch(theme=dashboard_theme(), css=DASHBOARD_CSS)
 
 
 if __name__ == "__main__":
