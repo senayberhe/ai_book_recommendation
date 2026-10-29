@@ -29,3 +29,8 @@ chroma_db/
 
 # Old git history containing a leaked key — delete this folder from Finder
 _OLD_GIT_HAS_SECRET_DELETE_ME/
+
+# Local evaluation results and private notes
+/local_evaluation/runs/
+/local_evaluation/README.md
+/PRIVATE_PROJECT_GUIDE.md

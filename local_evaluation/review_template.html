@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Margin · Private relevance review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f3ec;color:#263e32;font:16px/1.6 system-ui,sans-serif}
+main{max-width:960px;margin:auto;padding:28px}h1,h2{font-family:Georgia,serif}h1{margin:0}header{border-bottom:1px solid #ccd3c5;padding-bottom:20px}
+nav{position:sticky;top:0;background:#f5f3ec;padding:12px 0;z-index:1;display:flex;gap:10px;flex-wrap:wrap}
+button,select,.upload{font:inherit;padding:9px 14px;border:1px solid #b8c5b2;border-radius:8px;background:#fffdf8;color:#263e32;cursor:pointer}
+button.primary{background:#274e3c;color:white}button:disabled{opacity:.4;cursor:default}button:focus-visible,select:focus-visible{outline:3px solid #ad7537}
+.query{background:#e8ecdf;padding:18px;border-radius:12px}.book{margin:18px 0;background:#fffdf8;border:1px solid #d9dece;border-radius:12px;padding:22px}
+.book h3{margin:0;font:23px Georgia,serif}.muted{font-size:13px;color:#586b58}.description{white-space:pre-line;font-size:15px}
+fieldset{border:0;padding:0;margin-top:16px}legend{font-weight:650}label.grade{display:inline-block;padding:8px 12px;margin:6px 6px 0 0;border:1px solid #cdd8c4;border-radius:8px;cursor:pointer}
+label.grade:has(input:checked){background:#dce8d2;border-color:#4b7650}input[type=radio]{accent-color:#31543c}.badge{float:right;font-size:12px;color:#557346}
+#notice{min-height:24px;font-size:13px}details{background:#eeeee4;padding:12px;border-radius:8px}summary{cursor:pointer}.upload input{max-width:210px}
+@media(max-width:600px){main{padding:16px}nav{gap:6px}.book{padding:16px}label.grade{display:block}}
+</style>
+<main><header><h1>Judge the book, not the ranking.</h1><p>Private review · <span id="split"></span> set · Results are shuffled and ranking names are hidden.</p>
+<details><summary>How to rate fairly</summary><p>Judge only the evidence in the title, authors and description. Topic relevance: <b>0</b> = unrelated or contradicts an explicit request; <b>1</b> = partially meets the request; <b>2</b> = strong match. Respect audience and category constraints.</p><p>Mood fit is separate: <b>0</b> = unsupported or conflicting; <b>1</b> = plausible/weak evidence; <b>2</b> = clear evidence. If the description is insufficient for a fair judgment, leave the item unrated and note it for discussion. Do not guess the book's contents.</p><p>Rate every candidate in a query before moving on. There is no preset correct answer and no default selected grade. Work is saved in this browser for this run. Export a JSON backup when finished; the browser cannot update project files directly. This page sends no network requests.</p></details></header>
+<nav><select id="querySelect" aria-label="Select query"></select><button id="previous">← Previous</button><button id="next">Next →</button><button class="primary" id="export">Export ratings</button></nav>
+<p id="progress"></p><div id="notice" role="status" aria-live="polite"></div><section id="query" class="query"></section><section id="books"></section>
+<label class="upload">Import an earlier ratings file <input id="import" type="file" accept="application/json,.json"></label>
+<p class="muted">No API calls, analytics, account login, or external assets. Keep this file and exported ratings local.</p></main>
+<script>
+const data=__REVIEW_DATA__;
+const key='margin-relevance-'+data.run_id+'-'+data.split;
+let saved={};let storageOK=true;
+try{saved=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){storageOK=false}
+let current=0;
+const $=id=>document.getElementById(id);
+const text=(tag,value,cls)=>{const el=document.createElement(tag);el.textContent=value;if(cls)el.className=cls;return el};
+$('split').textContent=data.split;
+const allowed=new Set(data.queries.flatMap(q=>q.pool.map(i=>i.item_id)));
+function complete(q){return q.pool.every(i=>Number.isInteger(saved[i.item_id]?.relevance)&&(q.tone==='All'||Number.isInteger(saved[i.item_id]?.mood)))}
+function progress(){const done=data.queries.filter(complete).length;const rated=data.queries.reduce((n,q)=>n+q.pool.filter(i=>Number.isInteger(saved[i.item_id]?.relevance)).length,0);$('progress').textContent=`${done} / ${data.queries.length} complete queries · ${rated} topic judgments`;
+[...$('querySelect').options].forEach((o,i)=>o.textContent=`${complete(data.queries[i])?'✓ ':''}${data.queries[i].id}`)}
+function persist(){try{localStorage.setItem(key,JSON.stringify(saved));$('notice').textContent='Saved in this browser. Export a JSON backup when finished.'}catch(e){storageOK=false;$('notice').textContent='Browser storage unavailable. Export ratings before closing this page.'}progress()}
+function grade(item,field,label){const set=document.createElement('fieldset');set.append(text('legend',label));
+['0 · No match','1 · Partial / plausible','2 · Strong / clear'].forEach((name,value)=>{const l=document.createElement('label');l.className='grade';const input=document.createElement('input');input.type='radio';input.name=item.item_id+'-'+field;input.value=value;input.checked=saved[item.item_id]?.[field]===value;input.onchange=()=>{saved[item.item_id]??={};saved[item.item_id][field]=value;persist()};l.append(input,document.createTextNode(' '+name));set.append(l)});
+const clear=document.createElement('button');clear.textContent='Clear rating';clear.onclick=()=>{if(saved[item.item_id])delete saved[item.item_id][field];persist();render()};set.append(clear);return set}
+function render(){const q=data.queries[current];$('querySelect').value=current;$('query').replaceChildren(text('h2',q.query),text('p',`Category: ${q.category} · Tone: ${q.tone}`));$('books').replaceChildren();
+q.pool.forEach((item,index)=>{const box=document.createElement('article');box.className='book';box.append(text('span',`${index+1} / ${q.pool.length}`,'badge'),text('h3',item.title),text('p',item.authors,'muted'),text('p',item.description,'description'),grade(item,'relevance','Does this book meet the request?'));if(q.tone!=='All')box.append(grade(item,'mood',`Does the description support the ${q.tone} mood?`));$('books').append(box)});
+$('previous').disabled=current===0;$('next').disabled=current===data.queries.length-1;progress();if(!storageOK)$('notice').textContent='Browser storage unavailable. Export ratings before closing.'}
+data.queries.forEach((q,index)=>{const o=document.createElement('option');o.value=index;o.textContent=q.id;$('querySelect').append(o)});
+$('querySelect').onchange=e=>{current=Number(e.target.value);render()};$('previous').onclick=()=>{current--;render();window.scrollTo(0,0)};$('next').onclick=()=>{current++;render();window.scrollTo(0,0)};
+$('export').onclick=()=>{const blob=new Blob([JSON.stringify({run_id:data.run_id,split:data.split,judgments:saved},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`judgments_${data.split}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);$('notice').textContent='Ratings exported. Use the report command in the evaluation README.'};
+$('import').onchange=async e=>{try{const p=JSON.parse(await e.target.files[0].text());if(p.run_id!==data.run_id||p.split!==data.split||!p.judgments)throw Error('Wrong run or split');for(const [id,values] of Object.entries(p.judgments)){if(!allowed.has(id)||typeof values!=='object'||values===null)throw Error('Unknown result ID');for(const [field,v] of Object.entries(values))if(!['relevance','mood'].includes(field)||!Number.isInteger(v)||v<0||v>2)throw Error('Invalid grade')}saved={...saved,...p.judgments};persist();render()}catch(err){$('notice').textContent='Could not import: '+err.message}};
+render();
+</script></html>
